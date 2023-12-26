@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include<stdlib.h>
 #include <string.h>
 
 struct Voiture{
@@ -54,13 +54,20 @@ void louerVoiture(char* marque, char* modele, char* date) {
                 locations=nouvelleLocation;
                 printf("La voiture %s %s a été louée.\n",marque,modele);
             }
+            FILE *f=fopen("locations.txt","a");
+                if(f==NULL){
+                    printf("Erreur d'ouverture du fichier!\n");
+                    exit(1);
+                }
+                fprintf(f,"Date : %s, Voiture : %s %s\n",date,marque,modele);
+                fclose(f);
+            }
             else{
                 printf("La voiture %s %s est indisponible.\n",marque,modele);
             }
             return;
         }
         tmp=tmp->next;
-    }
     printf("La voiture %s %s n'a pas été trouvée.\n",marque,modele);
 }
 
@@ -149,34 +156,39 @@ void reserverVoiture(char* marque,char* modele,char* date){
                 reservations=nouvelleReservation;
                 printf("La voiture %s %s a été réservée pour la date %s.\n",marque,modele,date);
             }
+            FILE *f=fopen("reservations.txt","a");
+                if(f==NULL){
+                    printf("Erreur d'ouverture du fichier!\n");
+                    exit(1);
+                }
+
+                fprintf(f, "Date : %s, Voiture : %s %s\n",date,marque,modele);
+                fclose(f);
+            }
             else{
                 printf("La voiture %s %s n'est pas disponible.\n",marque,modele);
             }
             return;
         }
         tmp=tmp->next;
-    }
+
     printf("La voiture %s %s n'a pas été trouvée.\n",marque,modele);
 }
-
 
 void genererRapportLocation(struct Location* locations){
     int totalVoituresLouees=0;
     float revenuTotal=0.0;
     struct Voiture* voiturePlusPopulaire=NULL;
     int compteurVoiturePlusPopulaire=0;
-
     struct Location* tmp=locations;
     while(tmp!=NULL){
         totalVoituresLouees++;
         revenuTotal+=tmp->prix;
-
         int compteur=0;
         struct Location* tmp2=locations;
         while(tmp2!=NULL){
             if(strcmp(tmp2->voiture->marque,tmp->voiture->marque)==0 && strcmp(tmp2->voiture->modele, tmp->voiture->modele)==0){
-                compteur++;
-            }
+                compteur++;}
             tmp2=tmp2->next;
         }
         if(compteur>compteurVoiturePlusPopulaire){
@@ -185,13 +197,18 @@ void genererRapportLocation(struct Location* locations){
         }
         tmp=tmp->next;
     }
-
-    printf("Rapport de location :\n");
-    printf("Total des voitures louées : %d\n",totalVoituresLouees);
-    printf("Revenu total : %.2f\n",revenuTotal);
-    if(voiturePlusPopulaire!=NULL){
-        printf("Voiture la plus populaire : %s %s\n",voiturePlusPopulaire->marque,voiturePlusPopulaire->modele);
+    FILE *f = fopen("rapport.txt","w");
+    if (f==NULL){
+        printf("Erreur d'ouverture du fichier!\n");
+        exit(1);
     }
+    fprintf(f, "Rapport de location :\n");
+    fprintf(f, "Total des voitures louées : %d\n",totalVoituresLouees);
+    fprintf(f, "Revenu total : %.2f\n",revenuTotal);
+    if(voiturePlusPopulaire!=NULL){
+        fprintf(f, "Voiture la plus populaire : %s %s\n",voiturePlusPopulaire->marque,voiturePlusPopulaire->modele);
+    }
+    fclose(f);
 }
 
 float calculerRevenuTotal(){
@@ -208,17 +225,31 @@ void afficherRevenuTotal(){
     float revenuTotal=calculerRevenuTotal();
     printf("Le revenu total généré par l'agence est de %.2f\n",revenuTotal);
 }
-
 int main(){
+    FILE *f=fopen("log.txt","w");
+    if(f==NULL){
+        printf("Erreur d'ouverture du fichier!\n");
+        exit(1);
+    }
     afficherVoituresDisponibles();
+    fprintf(f,"Voitures disponibles affichées.\n");
     afficherHistoriqueLocations();
+    fprintf(f,"Historique des locations affiché.\n");
     louerVoiture("Marque","Modèle","24/12/2023");
+    fprintf(f,"Voiture louée : Marque Modèle.\n");
     afficherDescriptionVoiture("Marque","Modèle");
+    fprintf(f,"Description de la voiture affichée : Marque Modèle.\n");
     supprimerVoiture("Marque","Modèle");
+    fprintf(f,"Voiture supprimée : Marque Modèle.\n");
     modifierDescriptionEtatVoiture("Marque","Modèle","Nouvelle Marque","Nouveau Modèle",1);
+    fprintf(f,"Description et état de la voiture modifiés : Marque Modèle.\n");
     rechercherVoiture("Marque","Modèle");
+    fprintf(f,"Voiture recherchée : Marque Modèle.\n");
     reserverVoiture("Marque","Modèle","25/12/2023");
+    fprintf(f,"Voiture réservée : Marque Modèle.\n");
     genererRapportLocation(locations);
+    fprintf(f,"Rapport de location généré.\n");
     afficherRevenuTotal();
-    return 0;
+    fprintf(f,"Revenu total affiché.\n");
+    fclose(f);
 }
