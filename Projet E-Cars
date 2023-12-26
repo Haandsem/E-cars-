@@ -226,7 +226,7 @@ void afficherRevenuTotal(){
     printf("Le revenu total généré par l'agence est de %.2f\n",revenuTotal);
 }
 int main(){
-    FILE *f=fopen("log.txt","w");
+    FILE *f=fopen("Main.txt","w");
     if(f==NULL){
         printf("Erreur d'ouverture du fichier!\n");
         exit(1);
